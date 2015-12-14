@@ -5,32 +5,33 @@ import os
 HOME_DIR = os.path.expanduser("~")
 VIRTUAL_ENVIRONMENTS = "{0}/virtualenvs".format(HOME_DIR)
 
-selection = -1
-index = 0
-directory_list = []
+selection = 0
+index = 1
+directory_dict = {}
 for directory in os.listdir(VIRTUAL_ENVIRONMENTS):
     if not directory.startswith("."):
+        directory_dict[index] = "{0}".format(directory)
         index += 1
-        print "{0}. {1}".format(index, directory)
-        directory_list.append(directory)
 
-print "0. Exit"
+for key in directory_dict:
+    print "{0}. {1}".format(key, directory_dict[key])
+print "{0}. Exit".format(key+1)
 
-while selection != 0:
+min_selection = min(directory_dict)
+max_selection = max(directory_dict) + 1
+
+while True:
     selection = int(raw_input(
-        "Select an environment to activate."))
+        "Select an environment to activate: "))
+    if min_selection <= selection <= max_selection:
+        break
 
-if selection == 0:
+if selection == max_selection:
     print "No environment activated."
     exit()
 else:
-    SELECTED_VIRTUAL_ENVIRONMENT = "{0}/{1}".format(VIRTUAL_ENVIRONMENTS, directory_list[selection-1])
-    ACTIVATION_CALL = ". {0}/bin/activate".format(SELECTED_VIRTUAL_ENVIRONMENT)
+    SELECTED_VIRTUAL_ENVIRONMENT = "{0}/{1}".format(
+        VIRTUAL_ENVIRONMENTS, directory_dict[selection])
 
-    activator = open("help_activate.sh", "w")
-    activator.write("#!/bin/bash\n")
-    activator.write("{0}\n".format(ACTIVATION_CALL))
-    activator.close()
-
-    os.system("/bin/bash --rcfile help_activate.sh")
-    os.remove("help_activate.sh")
+    os.system("/bin/bash --rcfile {0}/bin/activate".format(
+        SELECTED_VIRTUAL_ENVIRONMENT))
